@@ -74,13 +74,13 @@ class ModifiedLapseWarpDrive:
     def shift_vector(self, x, y, z, r, t):
         f_spatial = self.shape_function(r)
         S_t = self.temporal_transition(t)
-        v_magnitude = self.v_final * c * f_spatial * S_t
+        v_magnitude = self.v_final * c() * f_spatial * S_t
         return v_magnitude, np.zeros_like(x), np.zeros_like(x)
 
     def lapse_function(self, x, y, z, r, t):
         """Time-dependent lapse function"""
         # Base lapse from shell
-        r_g = 2.0 * G * self.M / c**2
+        r_g = 2.0 * G() * self.M / c()**2
         f_shell = self.shape_function(r)
 
         alpha_base = np.ones_like(r)
@@ -127,7 +127,12 @@ class ModifiedLapseWarpDrive:
         gamma = {(i, j): np.ones_like(X) if i == j else np.zeros_like(X)
                 for i in range(3) for j in range(3)}
 
-        metric_dict = three_plus_one_builder(alpha, beta, gamma)
+        # Add time dimension to make 4D arrays (required by WarpFactory)
+        alpha_4d = alpha[np.newaxis, :, :, :]
+        beta_4d = {key: val[np.newaxis, :, :, :] for key, val in beta.items()}
+        gamma_4d = {key: val[np.newaxis, :, :, :] for key, val in gamma.items()}
+
+        metric_dict = three_plus_one_builder(alpha_4d, beta_4d, gamma_4d)
 
         return Tensor(
             metric_dict,

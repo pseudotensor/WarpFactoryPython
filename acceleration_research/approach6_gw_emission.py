@@ -153,7 +153,7 @@ class GWEmissionWarpDrive:
         # Velocity from GW emission
         # Simplified model: v ∝ ∫ P_GW dt
         S_t = transition_sigmoid(t, self.t0, self.tau)
-        v_magnitude = self.v_final * c * f_spatial * S_t
+        v_magnitude = self.v_final * c() * f_spatial * S_t
 
         # Direction: +x
         beta_x = v_magnitude
@@ -185,7 +185,7 @@ class GWEmissionWarpDrive:
 
     def lapse_function(self, r: np.ndarray, t: float) -> np.ndarray:
         """Lapse function (approximately time-independent for simplicity)"""
-        r_g = 2.0 * G * self.M / c**2
+        r_g = 2.0 * G() * self.M / c()**2
 
         # Average shape function
         theta_avg = np.pi / 2
@@ -215,7 +215,12 @@ class GWEmissionWarpDrive:
         gamma = {(i, j): np.ones_like(X) if i == j else np.zeros_like(X)
                 for i in range(3) for j in range(3)}
 
-        metric_dict = three_plus_one_builder(alpha, beta, gamma)
+        # Add time dimension to make 4D arrays (required by WarpFactory)
+        alpha_4d = alpha[np.newaxis, :, :, :]
+        beta_4d = {key: val[np.newaxis, :, :, :] for key, val in beta.items()}
+        gamma_4d = {key: val[np.newaxis, :, :, :] for key, val in gamma.items()}
+
+        metric_dict = three_plus_one_builder(alpha_4d, beta_4d, gamma_4d)
 
         return Tensor(
             metric_dict,
@@ -251,7 +256,7 @@ class GWEmissionWarpDrive:
 
         # Power (simplified formula)
         # Real calculation would need full tensor decomposition
-        P_GW = (G / c**5) * Q_amplitude**2 * self.omega**6 * S_t
+        P_GW = (G() / c()**5) * Q_amplitude**2 * self.omega**6 * S_t
 
         return P_GW
 
@@ -285,7 +290,7 @@ def run_gw_emission_simulation(params=None, grid_size=(20, 40, 40, 40),
     if verbose:
         print(f"\nEstimated GW power at t={t_mid}s: {P_GW:.3e} W")
         print(f"For comparison, LIGO detects ~10^49 W from binary mergers")
-        print(f"Efficiency: ~{(params['v_final']*c)**2 / (2*P_GW*params['tau']):.2e}")
+        print(f"Efficiency: ~{(params['v_final']*c())**2 / (2*P_GW*params['tau']):.2e}")
 
     time_range = (0.0, params['t0'] + 3*params['tau'])
     spatial_extent_tuple = [(-spatial_extent, spatial_extent)] * 3

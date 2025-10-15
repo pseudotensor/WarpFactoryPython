@@ -160,7 +160,7 @@ class GradualTransitionWarpDrive:
         """
         Time-dependent shift vector
 
-        β^i(r,t) = v_final * c * f(r) * S(t)
+        β^i(r,t) = v_final * c() * f(r) * S(t)
 
         Args:
             x, y, z: Cartesian coordinates
@@ -176,8 +176,8 @@ class GradualTransitionWarpDrive:
         # Temporal transition
         S_t = self.temporal_transition(t)
 
-        # Magnitude: v_final * c * f(r) * S(t)
-        v_magnitude = self.v_final * c * f_spatial * S_t
+        # Magnitude: v_final * c() * f(r) * S(t)
+        v_magnitude = self.v_final * c() * f_spatial * S_t
 
         # Direction: motion in +x direction
         beta_x = v_magnitude
@@ -198,7 +198,7 @@ class GradualTransitionWarpDrive:
             Lapse function alpha
         """
         # Schwarzschild-like lapse
-        r_g = 2.0 * G * self.M / c**2
+        r_g = 2.0 * G() * self.M / c()**2
 
         # Shape function
         f_shell = self.shape_function(r)
@@ -266,7 +266,12 @@ class GradualTransitionWarpDrive:
         alpha, beta, gamma = self.get_metric_3plus1(t, X, Y, Z)
 
         # Build metric
-        metric_dict = three_plus_one_builder(alpha, beta, gamma)
+        # Add time dimension to make 4D arrays (required by WarpFactory)
+        alpha_4d = alpha[np.newaxis, :, :, :]
+        beta_4d = {key: val[np.newaxis, :, :, :] for key, val in beta.items()}
+        gamma_4d = {key: val[np.newaxis, :, :, :] for key, val in gamma.items()}
+
+        metric_dict = three_plus_one_builder(alpha_4d, beta_4d, gamma_4d)
 
         # Create Tensor
         metric = Tensor(

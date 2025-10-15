@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from warpfactory.core.tensor import Tensor
 from warpfactory.metrics.three_plus_one import three_plus_one_builder, three_plus_one_decomposer
 from warpfactory.analyzer.energy_conditions import get_energy_conditions
-from warpfactory.solver.einstein import get_einstein_tensor
+from warpfactory.solver.einstein import calculate_einstein_tensor
 from warpfactory.core.tensor_ops import change_tensor_index
 
 
@@ -304,25 +304,13 @@ def evaluate_energy_conditions_over_time(
             # Get metric at this time
             metric = time_dependent_metric.get_metric_at_time(t_idx)
 
-            # Compute Einstein tensor and stress-energy
+            # Compute stress-energy tensor from metric
             try:
-                from warpfactory.solver.einstein import get_einstein_tensor
-                einstein_tensor = get_einstein_tensor(
+                from warpfactory.solver.energy import get_energy_tensor
+                stress_energy = get_energy_tensor(
                     metric,
-                    order=2,
-                    try_gpu=False
-                )
-
-                # Convert to stress-energy: T = (c^4 / 8πG) G
-                # For simplicity, use geometric units where c = G = 1
-                # In real units: c^4/(8πG) ≈ 1.347e51 kg/(m·s^2)
-                stress_energy = Tensor(
-                    {key: val.copy() for key, val in einstein_tensor.tensor.items()},
-                    tensor_type="stress-energy",
-                    name=f"{metric.name}_T",
-                    index=einstein_tensor.index,
-                    coords=einstein_tensor.coords,
-                    params=einstein_tensor.params
+                    try_gpu=False,
+                    diff_order='second'
                 )
 
                 # Evaluate energy condition

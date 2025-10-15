@@ -209,8 +209,8 @@ class HybridMetricWarpDrive:
         f_spatial = self.shape_function(r)
 
         # Direction: assume motion in +x direction
-        # Magnitude: v_final * c * f(r) * S(t)
-        v_magnitude = self.v_final * c * f_spatial * S_shift
+        # Magnitude: v_final * c() * f(r) * S(t)
+        v_magnitude = self.v_final * c() * f_spatial * S_shift
 
         # Components
         beta_x = v_magnitude
@@ -244,7 +244,7 @@ class HybridMetricWarpDrive:
             S_shell = 1.0
 
         # Gravitational radius
-        r_g = 2.0 * G * self.M / c**2
+        r_g = 2.0 * G() * self.M / c()**2
 
         # Lapse: alpha = sqrt(1 - r_g / r) inside shell region
         # Smooth transition
@@ -317,7 +317,12 @@ class HybridMetricWarpDrive:
         alpha, beta, gamma = self.get_metric_3plus1(t, X, Y, Z)
 
         # Build metric from 3+1 components
-        metric_dict = three_plus_one_builder(alpha, beta, gamma)
+        # Add time dimension to make 4D arrays (required by WarpFactory)
+        alpha_4d = alpha[np.newaxis, :, :, :]
+        beta_4d = {key: val[np.newaxis, :, :, :] for key, val in beta.items()}
+        gamma_4d = {key: val[np.newaxis, :, :, :] for key, val in gamma.items()}
+
+        metric_dict = three_plus_one_builder(alpha_4d, beta_4d, gamma_4d)
 
         # Create Tensor object
         metric = Tensor(

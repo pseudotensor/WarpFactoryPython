@@ -23,9 +23,23 @@ def load_results(filepath: str) -> Dict:
 
 
 def save_results(results: Dict, filepath: str):
-    """Save results to pickle file"""
+    """Save results to pickle file (excluding unpicklable objects)"""
+    # Create a clean copy without unpicklable objects
+    clean_results = {}
+    for key, val in results.items():
+        if val is None:
+            clean_results[key] = None
+        else:
+            clean_results[key] = {
+                'approach': val.get('approach'),
+                'params': val.get('params'),
+                'results': val.get('results'),
+                'metrics': val.get('metrics')
+                # Exclude 'warp_drive' and 'time_dependent_metric' which contain lambda functions
+            }
+
     with open(filepath, 'wb') as f:
-        pickle.dump(results, f)
+        pickle.dump(clean_results, f)
 
 
 def compare_all_approaches(results_dict: Dict[str, Dict]) -> Dict:

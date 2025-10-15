@@ -97,7 +97,7 @@ class MultiShellWarpDrive:
         for i, (R1, R2) in enumerate(self.shell_radii):
             f = self.shape_function(r, R1, R2)
             S_t = transition_sigmoid(t, self.shell_t0[i], self.tau)
-            v_i = self.velocity_ratios[i] * self.v_final * c * f * S_t
+            v_i = self.velocity_ratios[i] * self.v_final * c() * f * S_t
             beta_x_total += v_i
 
         return beta_x_total, np.zeros_like(x), np.zeros_like(x)
@@ -108,7 +108,7 @@ class MultiShellWarpDrive:
 
         for i, (R1, R2) in enumerate(self.shell_radii):
             M_i = self.shell_masses[i]
-            r_g = 2.0 * G * M_i / c**2
+            r_g = 2.0 * G() * M_i / c()**2
             f = self.shape_function(r, R1, R2)
 
             mask = r > r_g
@@ -128,7 +128,12 @@ class MultiShellWarpDrive:
         gamma = {(i, j): np.ones_like(X) if i == j else np.zeros_like(X)
                 for i in range(3) for j in range(3)}
 
-        metric_dict = three_plus_one_builder(alpha, beta, gamma)
+        # Add time dimension to make 4D arrays (required by WarpFactory)
+        alpha_4d = alpha[np.newaxis, :, :, :]
+        beta_4d = {key: val[np.newaxis, :, :, :] for key, val in beta.items()}
+        gamma_4d = {key: val[np.newaxis, :, :, :] for key, val in gamma.items()}
+
+        metric_dict = three_plus_one_builder(alpha_4d, beta_4d, gamma_4d)
 
         return Tensor(
             metric_dict,
