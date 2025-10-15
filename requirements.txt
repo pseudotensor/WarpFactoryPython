@@ -1,0 +1,22 @@
+numpy>=1.20.0
+scipy>=1.7.0
+matplotlib>=3.3.0
+
+# Optional GPU acceleration
+# cupy>=10.0.0
+
+# Optional visualization
+# pyvista>=0.38.0
+# vtk>=9.0.0
+
+# Development tools
+# pytest>=7.0.0
+# pytest-cov>=3.0.0
+# black>=22.0.0
+# flake8>=4.0.0
+# mypy>=0.950
+
+# Jupyter notebooks
+# jupyter>=1.0.0
+# jupyterlab>=3.0.0
+# ipywidgets>=7.6.0
