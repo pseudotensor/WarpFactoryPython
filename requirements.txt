@@ -3,7 +3,11 @@ scipy>=1.7.0
 matplotlib>=3.3.0
 
 # Optional GPU acceleration
-# cupy>=10.0.0
+# For GPU support, install ONE of the following based on your CUDA version:
+# CUDA 11.x: pip install cupy-cuda11x
+# CUDA 12.x: pip install cupy-cuda12x
+# Auto-detect: pip install cupy
+# See GPU_USAGE.md for detailed instructions
 
 # Optional visualization
 # pyvista>=0.38.0

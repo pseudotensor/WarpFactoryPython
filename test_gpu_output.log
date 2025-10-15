@@ -1,0 +1,24 @@
+
+
+╔==============================================================================╗
+║                    WARPFACTORY GPU USAGE TEST                                ║
+╚==============================================================================╝
+
+================================================================================
+GPU AVAILABILITY CHECK
+================================================================================
+✓ CuPy version: 13.6.0
+✓ CUDA version: 11080
+✓ CUDA is available
+✓ GPU memory: 23.55 GB used / 51.04 GB total
+
+================================================================================
+BASIC CUPY TEST
+================================================================================
+Creating arrays on GPU...
+Performing computation on GPU...
+✗ Basic CuPy test failed: CuPy failed to load libnvrtc.so.11.2: OSError: libnvrtc.so.11.2: cannot open shared object file: No such file or directory
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Basic CuPy test failed - GPU may not be working correctly
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

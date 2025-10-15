@@ -125,6 +125,12 @@ def get_energy_tensor(
         except ImportError:
             print("CuPy not installed, falling back to CPU computation")
             try_gpu = False
+        except (RuntimeError, OSError) as e:
+            print(f"GPU computation failed ({e}), falling back to CPU computation")
+            try_gpu = False
+        except Exception as e:
+            print(f"Unexpected GPU error ({type(e).__name__}: {e}), falling back to CPU computation")
+            try_gpu = False
 
     if not try_gpu:
         # Compute on CPU
