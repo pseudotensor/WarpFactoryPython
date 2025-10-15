@@ -87,10 +87,22 @@ warpfactory/
 
 ## Documentation
 
-For comprehensive documentation and usage instructions, please visit the [WarpFactory Documentation](https://applied-physics.gitbook.io/warp-factory).
+### Quick Links
+- [Getting Started Guide](docs/00_START_HERE.md) - Start here if you're new to WarpFactory
+- [Installation Guide](docs/INSTALLATION_GUIDE.md) - Detailed installation instructions
+- [Feature Matrix](docs/FEATURE_MATRIX.md) - Complete feature comparison
+- [Project Documentation](docs/) - Full documentation directory
+
+### Online Resources
+For comprehensive API documentation and interactive tutorials, visit the [WarpFactory Documentation](https://applied-physics.gitbook.io/warp-factory).
+
+### Validation
+The Python implementation has been thoroughly validated against published results. See the [validation/](validation/) directory for validation scripts and detailed reports.
+
+### Testing
+Unit and integration tests are available in the [tests/](tests/) directory.
 
 ### References
-
 - [CQG Paper](https://iopscience.iop.org/article/10.1088/1361-6382/ad2e42)
 - [arXiv](https://arxiv.org/abs/2404.03095)
 
