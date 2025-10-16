@@ -1,0 +1,50 @@
+================================================================================
+CRITICAL VALIDATION TEST
+================================================================================
+
+Testing Fuchs shell WITH actual energy condition computation
+This was SKIPPED in the original reproduction (compute_energy_conditions=False)
+
+
+================================================================================
+TEST 1: Static Matter Shell (v=0, no warp)
+================================================================================
+
+=== Creating Matter Shell Metric (Section 3) ===
+Parameters:
+  R1 (inner radius) = 10.0 m
+  R2 (outer radius) = 20.0 m
+  M (total mass) = 4.490e+27 kg (2.366 Jupiter masses)
+  Grid size = [1, 61, 61, 61]
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:37: RuntimeWarning: invalid value encountered in sqrt
+  numerator = R * np.sqrt(R - 2*G*M_end/c**2) - np.sqrt(R**3 - 2*G*M_end*r**2/c**2)
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:38: RuntimeWarning: invalid value encountered in sqrt
+  denominator = np.sqrt(R**3 - 2*G*M_end*r**2/c**2) - 3*R*np.sqrt(R - 2*G*M_end/c**2)
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:68: RuntimeWarning: overflow encountered in exp
+  f = np.abs(1.0 / (np.exp(exponent) + 1) *
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/warp_shell.py:115: RuntimeWarning: invalid value encountered in divide
+  B = 1.0 / (1.0 - 2*G*M / (rsample * c**2))
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:97: RuntimeWarning: invalid value encountered in divide
+  dalpha = (G*M/c**2 + 4*np.pi*G*r**3*P/c**4) / (r**2 - 2*G*M*r/c**2)
+✓ Shell metric created successfully
+
+Computing stress-energy tensor...
+
+=== Computing Stress-Energy Tensor for Static Shell v=0 ===
+  Computing stress-energy tensor...
+✓ Stress-energy tensor computed for Static Shell v=0
+
+Computing energy conditions (this is expensive, please wait)...
+
+=== Checking Energy Conditions for Static Shell v=0 ===
+Traceback (most recent call last):
+  File "/WarpFactory/warpfactory_py/paper_2405.02709/test_with_energy_conditions.py", line 187, in <module>
+    results = test_static_shells()
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/WarpFactory/warpfactory_py/paper_2405.02709/test_with_energy_conditions.py", line 41, in test_static_shells
+    shell_conditions = reproduction.check_energy_conditions_full(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/WarpFactory/warpfactory_py/paper_2405.02709/reproduce_results.py", line 161, in check_energy_conditions_full
+    results = get_energy_conditions(metric, stress_energy)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: get_energy_conditions() missing 1 required positional argument: 'condition'

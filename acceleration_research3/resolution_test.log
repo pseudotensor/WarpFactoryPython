@@ -1,0 +1,55 @@
+================================================================================
+RESOLUTION SCALING TEST
+================================================================================
+
+Testing if energy condition violations are numerical artifacts.
+If they scale down with resolution → numerical
+If they persist → physical
+
+
+Testing grid size [1, 15, 15, 15]...
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:68: RuntimeWarning: overflow encountered in exp
+  f = np.abs(1.0 / (np.exp(exponent) + 1) *
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/warp_shell.py:115: RuntimeWarning: invalid value encountered in divide
+  B = 1.0 / (1.0 - 2*G*M / (rsample * c**2))
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:97: RuntimeWarning: invalid value encountered in divide
+  dalpha = (G*M/c**2 + 4*np.pi*G*r**3*P/c**4) / (r**2 - 2*G*M*r/c**2)
+  NEC min: -2.455e+40
+  NEC max: 1.714e+39
+  Violations: 2597/3375 (76.9%)
+
+
+Testing grid size [1, 21, 21, 21]...
+  NEC min: -9.728e+40
+  NEC max: 5.495e+39
+  Violations: 5079/9261 (54.8%)
+
+
+Testing grid size [1, 31, 31, 31]...
+  NEC min: -3.579e+41
+  NEC max: 1.033e+40
+  Violations: 10307/29791 (34.6%)
+
+================================================================================
+SCALING ANALYSIS
+================================================================================
+
+Grid Size                Points         NEC Min   Violations
+--------------------------------------------------------------------------------
+[1, 15, 15, 15]            3375      -2.455e+40       76.9%
+[1, 21, 21, 21]            9261      -9.728e+40       54.8%
+[1, 31, 31, 31]           29791      -3.579e+41       34.6%
+
+✗ Violations PERSIST with resolution → Likely PHYSICAL
+  These are real energy condition violations
+
+Scaling ratios:
+  15→21 grid: 3.962
+  21→31 grid: 3.680
+  → Inconsistent scaling (may need higher resolution)
+
+================================================================================
+
+CONCLUSION: Violations ~10^40 persist across resolutions
+These appear to be PHYSICAL violations, not numerical artifacts.
+

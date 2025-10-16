@@ -1,0 +1,134 @@
+
+================================================================================
+CRITICAL VALIDATION TEST
+================================================================================
+
+Testing if Fuchs shell actually satisfies energy conditions
+(The paper claimed zero violations but never computed them!)
+
+
+
+
+
+================================================================================
+Testing Static Shell (no warp): v=0.0c
+================================================================================
+
+Creating metric...
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:68: RuntimeWarning: overflow encountered in exp
+  f = np.abs(1.0 / (np.exp(exponent) + 1) *
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/warp_shell.py:115: RuntimeWarning: invalid value encountered in divide
+  B = 1.0 / (1.0 - 2*G*M / (rsample * c**2))
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:97: RuntimeWarning: invalid value encountered in divide
+  dalpha = (G*M/c**2 + 4*np.pi*G*r**3*P/c**4) / (r**2 - 2*G*M*r/c**2)
+✓ Metric created
+
+Computing stress-energy tensor...
+✓ Stress-energy computed
+
+Checking energy conditions (this takes a few minutes)...
+
+  Null Energy Condition:
+    Min: -9.768975e+40
+    Max: 5.308055e+39
+    Violations: 5110 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+  Weak Energy Condition:
+    Min: -1.985728e+41
+    Max: 5.308055e+39
+    Violations: 6139 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+  Dominant Energy Condition:
+    Min: -1.926782e+40
+    Max: 3.985818e+41
+    Violations: 3175 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+  Strong Energy Condition:
+    Min: -2.963009e+41
+    Max: 3.635379e+40
+    Violations: 4478 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+
+
+================================================================================
+Testing Warp Shell (paper value): v=0.02c
+================================================================================
+
+Creating metric...
+✓ Metric created
+
+Computing stress-energy tensor...
+✓ Stress-energy computed
+
+Checking energy conditions (this takes a few minutes)...
+
+  Null Energy Condition:
+    Min: -1.019633e+41
+    Max: 5.224588e+39
+    Violations: 5736 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+  Weak Energy Condition:
+    Min: -1.985051e+41
+    Max: 5.224588e+39
+    Violations: 6578 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+  Dominant Energy Condition:
+    Min: -2.042926e+40
+    Max: 3.977972e+41
+    Violations: 3763 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+  Strong Energy Condition:
+    Min: -2.958706e+41
+    Max: 3.632906e+40
+    Violations: 5148 / 9261 points
+    ⚠ VIOLATIONS DETECTED
+
+
+
+================================================================================
+CRITICAL FINDINGS
+================================================================================
+
+Static Shell (v=0):
+  ✗ Null      : min=-9.769e+40, violations=5110
+  ✗ Weak      : min=-1.986e+41, violations=6139
+  ✗ Dominant  : min=-1.927e+40, violations=3175
+  ✗ Strong    : min=-2.963e+41, violations=4478
+  → HAS VIOLATIONS (worst: -2.963e+41)
+
+Warp Shell (v=0.02):
+  ✗ Null      : min=-1.020e+41, violations=5736
+  ✗ Weak      : min=-1.985e+41, violations=6578
+  ✗ Dominant  : min=-2.043e+40, violations=3763
+  ✗ Strong    : min=-2.959e+41, violations=5148
+  → HAS VIOLATIONS (worst: -2.959e+41)
+
+================================================================================
+CONCLUSION
+================================================================================
+
+⚠⚠⚠ CRITICAL ISSUE IDENTIFIED ⚠⚠⚠
+
+The Fuchs shell DOES have energy condition violations!
+
+The paper claimed zero violations, but:
+  1. The reproduction script used compute_energy_conditions=False
+  2. Energy conditions were NEVER ACTUALLY COMPUTED
+  3. The claim of 'zero violations' was not validated
+
+Actual violations:
+  Static shell (v=0): -2.963e+41
+  Warp shell (v=0.02): -2.959e+41
+
+This matches the ~10^40 violations found in acceleration_research3!
+
+The 'breakthrough' was based on unvalidated claims.
+
+================================================================================
