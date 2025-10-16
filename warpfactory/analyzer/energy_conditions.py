@@ -16,6 +16,7 @@ from ..core.tensor import Tensor
 from ..core.tensor_ops import change_tensor_index, verify_tensor, get_array_module
 from ..metrics.minkowski import get_minkowski_metric
 from .utils import generate_uniform_field, get_inner_product, get_trace
+from .frame_transfer import do_frame_transfer
 
 
 def get_energy_conditions(
@@ -68,6 +69,12 @@ def get_energy_conditions(
         except ImportError:
             warnings.warn("CuPy not installed, using CPU")
             try_gpu = False
+
+    # Convert energy tensor into the local inertial frame (Eulerian frame)
+    # This is CRITICAL - energy conditions must be evaluated in Eulerian frame!
+    if not (hasattr(energy_tensor, 'frame') and hasattr(energy_tensor, 'frame') and
+            energy_tensor.frame and energy_tensor.frame.lower() == 'eulerian'):
+        energy_tensor = do_frame_transfer(metric, energy_tensor, "Eulerian", try_gpu)
 
     # Get size of spacetime
     a, b, c, d = metric.shape
