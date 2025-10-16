@@ -1,0 +1,280 @@
+======================================================================
+RIGOROUS REPRODUCTION OF arXiv:2405.02709v1
+Paper: Constant Velocity Physical Warp Drive Solution
+Authors: Jared Fuchs et al.
+======================================================================
+
+
+STEP 1: MATTER SHELL (Baseline)
+
+======================================================================
+Building MATTER SHELL metric
+======================================================================
+Parameters:
+  R1 = 10.0 m
+  R2 = 20.0 m
+  M = 4.49e+27 kg (2.366 Jupiter masses)
+  Grid: [1, 64, 64, 64]
+  Observer sampling: 100 angular, 10 temporal
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:37: RuntimeWarning: invalid value encountered in sqrt
+  numerator = R * np.sqrt(R - 2*G*M_end/c**2) - np.sqrt(R**3 - 2*G*M_end*r**2/c**2)
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:38: RuntimeWarning: invalid value encountered in sqrt
+  denominator = np.sqrt(R**3 - 2*G*M_end*r**2/c**2) - 3*R*np.sqrt(R - 2*G*M_end/c**2)
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:68: RuntimeWarning: overflow encountered in exp
+  f = np.abs(1.0 / (np.exp(exponent) + 1) *
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/warp_shell.py:115: RuntimeWarning: invalid value encountered in divide
+  B = 1.0 / (1.0 - 2*G*M / (rsample * c**2))
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:97: RuntimeWarning: invalid value encountered in divide
+  dalpha = (G*M/c**2 + 4*np.pi*G*r**3*P/c**4) / (r**2 - 2*G*M*r/c**2)
+
+======================================================================
+Computing Energy Conditions: Matter Shell
+======================================================================
+Computing stress-energy tensor (T_μν)...
+
+Evaluating Null Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+/WarpFactory/warpfactory_py/paper_2405_rigorous/reproduction_exact.py:143: RuntimeWarning: All-NaN slice encountered
+  min_val = np.nanmin(ec_map)
+/WarpFactory/warpfactory_py/paper_2405_rigorous/reproduction_exact.py:144: RuntimeWarning: All-NaN slice encountered
+  max_val = np.nanmax(ec_map)
+/WarpFactory/warpfactory_py/paper_2405_rigorous/reproduction_exact.py:145: RuntimeWarning: Mean of empty slice
+  mean_val = np.nanmean(ec_map[~np.isnan(ec_map)])
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Weak Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Strong Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Dominant Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+
+STEP 2: WARP SHELL (With shift vector)
+
+======================================================================
+Building WARP SHELL metric
+======================================================================
+Parameters:
+  R1 = 10.0 m
+  R2 = 20.0 m
+  M = 4.49e+27 kg (2.366 Jupiter masses)
+  β_warp = 0.02
+  v_warp = 0.02
+  Grid: [1, 64, 64, 64]
+  Observer sampling: 100 angular, 10 temporal
+
+======================================================================
+Computing Energy Conditions: Warp Shell
+======================================================================
+Computing stress-energy tensor (T_μν)...
+
+Evaluating Null Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Weak Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Strong Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Dominant Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+
+STEP 3: VISUAL ANALYSIS
+
+======================================================================
+Analyzing Y-axis slice at index 32
+======================================================================
+/WarpFactory/warpfactory_py/paper_2405_rigorous/reproduction_exact.py:190: RuntimeWarning: All-NaN slice encountered
+  cmap='RdBu_r', vmin=np.nanmin(data), vmax=np.nanmax(data))
+Saved: shell_energy_conditions.png
+
+======================================================================
+Analyzing Y-axis slice at index 32
+======================================================================
+Saved: warp_shell_energy_conditions.png
+
+
+STEP 4: CONVERGENCE TEST
+
+======================================================================
+CONVERGENCE TEST - Multiple Grid Resolutions
+======================================================================
+
+
+Testing resolution: 32³
+
+======================================================================
+Building WARP SHELL metric
+======================================================================
+Parameters:
+  R1 = 10.0 m
+  R2 = 20.0 m
+  M = 4.49e+27 kg (2.366 Jupiter masses)
+  β_warp = 0.02
+  v_warp = 0.02
+  Grid: [1, 32, 32, 32]
+  Observer sampling: 100 angular, 10 temporal
+
+======================================================================
+Computing Energy Conditions: Warp Shell @ 32³
+======================================================================
+Computing stress-energy tensor (T_μν)...
+
+Evaluating Null Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: -2.282173e+40
+    Max value: 9.924547e+39
+    Mean value: 8.097861e+37
+    Violations: 14888 / 32768 points
+    ⚠ VIOLATION DETECTED! Worst: -2.282173e+40
+
+Evaluating Weak Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: -4.404389e+40
+    Max value: 9.924547e+39
+    Mean value: -6.724255e+38
+    Violations: 15186 / 32768 points
+    ⚠ VIOLATION DETECTED! Worst: -4.404389e+40
+
+Evaluating Strong Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: -4.841411e+40
+    Max value: 4.190233e+40
+    Mean value: 4.183078e+39
+    Violations: 11887 / 32768 points
+    ⚠ VIOLATION DETECTED! Worst: -4.841411e+40
+
+Evaluating Dominant Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: -2.136121e+40
+    Max value: 1.332166e+41
+    Mean value: 1.158485e+40
+    Violations: 8094 / 32768 points
+    ⚠ VIOLATION DETECTED! Worst: -2.136121e+40
+
+
+Testing resolution: 64³
+
+======================================================================
+Building WARP SHELL metric
+======================================================================
+Parameters:
+  R1 = 10.0 m
+  R2 = 20.0 m
+  M = 4.49e+27 kg (2.366 Jupiter masses)
+  β_warp = 0.02
+  v_warp = 0.02
+  Grid: [1, 64, 64, 64]
+  Observer sampling: 100 angular, 10 temporal
+
+======================================================================
+Computing Energy Conditions: Warp Shell @ 64³
+======================================================================
+Computing stress-energy tensor (T_μν)...
+
+Evaluating Null Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Weak Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Strong Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+Evaluating Dominant Energy Condition...
+  Observer sampling: 100 angular × 10 temporal
+  Results:
+    Min value: nan
+    Max value: nan
+    Mean value: nan
+    Violations: 0 / 0 points
+    ✓ No violations detected
+
+
+Testing resolution: 96³
+
+======================================================================
+Building WARP SHELL metric
+======================================================================
+Parameters:
+  R1 = 10.0 m
+  R2 = 20.0 m
+  M = 4.49e+27 kg (2.366 Jupiter masses)
+  β_warp = 0.02
+  v_warp = 0.02
+  Grid: [1, 96, 96, 96]
+  Observer sampling: 100 angular, 10 temporal
