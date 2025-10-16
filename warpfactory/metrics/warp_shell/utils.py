@@ -206,35 +206,38 @@ def sph2cart_diag(theta: float, phi: float, g11_sph: float, g22_sph: float) -> T
 
 def smooth_array(arr: np.ndarray, smooth_factor: float, iterations: int = 4) -> np.ndarray:
     """
-    Smooth an array using Savitzky-Golay filter
+    Smooth array using moving average (matches MATLAB smooth())
 
-    Applies multiple passes of smoothing to approximate MATLAB's smooth() function.
+    FIXED: Now uses moving average filter instead of Savitzky-Golay
+    FIXED: Removed double 1.79 multiplication (caller already applies it)
 
     Args:
         arr: Input array to smooth
-        smooth_factor: Smoothing strength factor
+        smooth_factor: Smoothing window span (used directly)
         iterations: Number of smoothing passes (default: 4)
 
     Returns:
         Smoothed array
     """
+    from scipy.ndimage import uniform_filter1d
+
     result = arr.copy()
 
-    # Determine window length based on smooth factor
-    # MATLAB's smooth() uses a moving average; we use Savitzky-Golay for similar effect
-    window_length = max(5, int(1.79 * smooth_factor))
-    if window_length % 2 == 0:
-        window_length += 1  # Must be odd
+    # FIX: Use smooth_factor directly (no 1.79 multiplication here)
+    span = int(smooth_factor)
+    if span < 1:
+        return result
+    if span % 2 == 0:
+        span += 1  # Must be odd for symmetry
 
     # Ensure window isn't larger than array
-    window_length = min(window_length, len(result))
-    if window_length < 5:
-        window_length = 5
+    span = min(span, len(result))
+    if span < 3:
+        return result
 
-    polyorder = min(3, window_length - 1)
-
+    # FIX: Use moving average (uniform filter) to match MATLAB smooth()
     for _ in range(iterations):
-        if len(result) > window_length:
-            result = savgol_filter(result, window_length, polyorder)
+        if len(result) >= span:
+            result = uniform_filter1d(result, size=span, mode='nearest')
 
     return result
