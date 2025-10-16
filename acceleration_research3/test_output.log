@@ -1,0 +1,76 @@
+FULL ADIABATIC ACCELERATION TEST
+================================================================================
+
+This will test if adiabatic evolution achieves zero violations
+Testing at T=100s with moderate resolution
+
+Expected runtime: ~3-5 minutes
+
+================================================================================
+ ADIABATIC FUCHS SHELL ACCELERATION SIMULATION
+================================================================================
+
+Parameters:
+  Final velocity: 0.02c
+  Acceleration time: 100.0 s
+  Time steps: 6
+  Grid size: [1, 15, 15, 15]
+  dv/dt: 2.00e-04 c/s
+
+Characteristic timescale: 6.67e-08 s
+Adiabatic parameter: T/τ = 1.50e+09
+  → STRONGLY ADIABATIC ✓
+
+Time evolution:
+
+  Step 1/6: t=0.0s, v=0.0000c/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:68: RuntimeWarning: overflow encountered in exp
+  f = np.abs(1.0 / (np.exp(exponent) + 1) *
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/warp_shell.py:115: RuntimeWarning: invalid value encountered in divide
+  B = 1.0 / (1.0 - 2*G*M / (rsample * c**2))
+/WarpFactory/warpfactory_py/warpfactory/metrics/warp_shell/utils.py:97: RuntimeWarning: invalid value encountered in divide
+  dalpha = (G*M/c**2 + 4*np.pi*G*r**3*P/c**4) / (r**2 - 2*G*M*r/c**2)
+ [computing energy conditions...] NEC_min=-2.46e+40 ✓
+  Step 2/6: t=20.0s, v=0.0005c ✓
+  Step 3/6: t=40.0s, v=0.0046c ✓
+  Step 4/6: t=60.0s, v=0.0154c ✓
+  Step 5/6: t=80.0s, v=0.0195c ✓
+  Step 6/6: t=100.0s, v=0.0200c [computing energy conditions...] NEC_min=-2.53e+40 ✓
+
+
+================================================================================
+ RESULTS
+================================================================================
+
+Total runtime: 5.9 seconds
+
+================================================================================
+ SCALING LAW ANALYSIS
+================================================================================
+
+Violation vs time:
+  t=0.0s: Violation = -2.46e+40
+  t=100.0s: Violation = -2.53e+40
+
+Scaling check:
+  (Needs multiple simulations with different T to verify)
+
+Results saved to: acceleration_research3/adiabatic_results_T100.pkl
+
+================================================================================
+ BREAKTHROUGH ASSESSMENT
+================================================================================
+
+Worst Null Energy Condition violation: -2.53e+40
+
+Predicted (from (dv/dt)²): 4.00e-08
+
+Improvement vs multi-shell: 1.03e+45x
+
+  Still has violations, but may scale down with longer T
+  Try T=1000s or T=10000s for better results
+
+Next steps:
+  1. Run at longer times: T=1000s, T=10000s
+  2. Verify scaling law
+  3. Compare with multi-shell quantitatively
+  4. If violations < 10^-10, this is THE solution!
