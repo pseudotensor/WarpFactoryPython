@@ -1,74 +1,23 @@
 version: '3.8'
 
 services:
-  warpfactory-gpu:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: warpfactory:gpu-latest
-    container_name: warpfactory-gpu
-
-    # Enable GPU support
+  warpfactory-dev:
+    build: .
+    container_name: warpfactory_conversion
+    volumes:
+      - .:/WarpFactory
+      - ./.claude_docker1:/home/warpuser/.claude
+    working_dir: /WarpFactory
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONUNBUFFERED=1
+      - JUPYTER_ENABLE_LAB=yes
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: all
-              capabilities: [gpu, compute, utility]
-
-    # Alternative GPU configuration for older Docker Compose versions
-    # Uncomment if the above doesn't work:
-    # runtime: nvidia
-    # environment:
-    #   - NVIDIA_VISIBLE_DEVICES=all
-    #   - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-
-    volumes:
-      # Mount the source code for development
-      - .:/WarpFactory/warpfactory_py
-      # Optional: Mount a data directory
-      - ./data:/data
-      # Optional: Mount output directory
-      - ./output:/output
-
-    working_dir: /WarpFactory/warpfactory_py
-
-    # Keep container running
-    stdin_open: true
-    tty: true
-
-    # Optional: Expose Jupyter port if needed
-    ports:
-      - "8888:8888"
-
-    # Set hostname
-    hostname: warpfactory-gpu
-
-    # Command to run on startup
-    command: /bin/bash
-
-  # CPU-only version for comparison/testing
-  warpfactory-cpu:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: warpfactory:cpu-latest
-    container_name: warpfactory-cpu
-
-    volumes:
-      - .:/WarpFactory/warpfactory_py
-      - ./data:/data
-      - ./output:/output
-
-    working_dir: /WarpFactory/warpfactory_py
-
-    stdin_open: true
-    tty: true
-
-    ports:
-      - "8889:8888"
-
-    hostname: warpfactory-cpu
-
+              capabilities: [gpu]
     command: /bin/bash
