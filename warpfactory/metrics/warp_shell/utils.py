@@ -129,11 +129,11 @@ def legendre_radial_interp(input_array: np.ndarray, r: float) -> float:
     x2 = int(np.ceil(r/r_scale))
     x3 = int(np.ceil(r/r_scale + 1))
 
-    # Get values (with bounds checking)
-    y0 = input_array[max(x0, 0)]
-    y1 = input_array[max(x1, 0)]
-    y2 = input_array[max(x2, 0)]
-    y3 = input_array[max(x3, 0)]
+    # Get values (with bounds checking) - FIX: Convert from 1-based MATLAB to 0-based Python
+    y0 = input_array[max(x0 - 1, 0)]
+    y1 = input_array[max(x1 - 1, 0)]
+    y2 = input_array[min(max(x2 - 1, 0), len(input_array) - 1)]
+    y3 = input_array[min(x3 - 1, len(input_array) - 1)]
 
     x = r
 
