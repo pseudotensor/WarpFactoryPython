@@ -6,7 +6,7 @@ services:
     container_name: warpfactory_conversion
     volumes:
       - .:/WarpFactory
-      - ./.claude_docker1:/home/warpuser/.claude
+      - ../.claude_docker1:/home/warpuser/.claude
       - /opt/matlab:/opt/matlab:ro
       - /home/jon/.matlab/R2023b_licenses:/home/warpuser/.matlab/R2023b_licenses:ro
       - matlab_prefs:/home/warpuser/.matlab/R2023b
