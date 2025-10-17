@@ -68,10 +68,10 @@ RUN useradd -m -s /bin/bash warpuser && \
 
 # Create a startup script to set up .claude.json from environment variable
 RUN echo '#!/bin/bash\n\
-if [ -n "$ANTHROPIC_API_KEY" ]; then\n\
+if [ -n "$INIT_ANTHROPIC_API_KEY" ]; then\n\
   echo "{\n\
   \"changelogLastFetched\": 1000000000000,\n\
-  \"primaryApiKey\": \"$ANTHROPIC_API_KEY\",\n\
+  \"primaryApiKey\": \"$INIT_ANTHROPIC_API_KEY\",\n\
   \"isQualifiedForDataSharing\": false,\n\
   \"hasCompletedOnboarding\": true,\n\
   \"lastOnboardingVersion\": \"0.2.107\",\n\
