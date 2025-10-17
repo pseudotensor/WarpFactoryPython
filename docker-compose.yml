@@ -7,12 +7,16 @@ services:
     volumes:
       - .:/WarpFactory
       - ./.claude_docker1:/home/warpuser/.claude
+      - /opt/matlab:/opt/matlab:ro
+      - /home/jon/.matlab/R2023b_licenses:/home/warpuser/.matlab/R2023b_licenses:ro
+      - matlab_prefs:/home/warpuser/.matlab/R2023b
     working_dir: /WarpFactory
     stdin_open: true
     tty: true
     environment:
       - PYTHONUNBUFFERED=1
       - JUPYTER_ENABLE_LAB=yes
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     deploy:
       resources:
         reservations:
@@ -21,3 +25,6 @@ services:
               count: all
               capabilities: [gpu]
     command: /bin/bash
+
+volumes:
+  matlab_prefs:

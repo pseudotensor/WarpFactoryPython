@@ -7,7 +7,7 @@ ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=${CUDA_HOME}/bin:${PATH}
 ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
 
-# Install system dependencies including Python 3.11, Node.js and npm
+# Install system dependencies including Python 3.11, Node.js, npm, and MATLAB dependencies
 RUN apt-get update && apt-get install -y \
     python3.11 \
     python3.11-dev \
@@ -17,6 +17,17 @@ RUN apt-get update && apt-get install -y \
     curl \
     wget \
     vim \
+    libxt6 \
+    libxrender1 \
+    libxtst6 \
+    libxi6 \
+    libxrandr2 \
+    libxcursor1 \
+    libxdamage1 \
+    libxcomposite1 \
+    libxfixes3 \
+    libfreetype6 \
+    libfontconfig1 \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
@@ -51,25 +62,33 @@ RUN npm install -g @anthropic-ai/claude-code
 
 # Create a non-root user for safety
 RUN useradd -m -s /bin/bash warpuser && \
+    chown -R warpuser:warpuser /WarpFactory && \
+    mkdir -p /home/warpuser/.matlab/R2023b && \
+    chown -R warpuser:warpuser /home/warpuser/.matlab
+
+# Create a startup script to set up .claude.json from environment variable
+RUN echo '#!/bin/bash\n\
+if [ -n "$ANTHROPIC_API_KEY" ]; then\n\
+  echo "{\n\
+  \"changelogLastFetched\": 1000000000000,\n\
+  \"primaryApiKey\": \"$ANTHROPIC_API_KEY\",\n\
+  \"isQualifiedForDataSharing\": false,\n\
+  \"hasCompletedOnboarding\": true,\n\
+  \"lastOnboardingVersion\": \"0.2.107\",\n\
+  \"maxSubscriptionNoticeCount\": 0,\n\
+  \"hasAvailableMaxSubscription\": false,\n\
+  \"lastReleaseNotesSeen\": \"0.2.107\"\n\
+}" > /home/warpuser/.claude.json\n\
+  chmod 600 /home/warpuser/.claude.json\n\
+fi\n\
+exec "$@"' > /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh && \
     chown -R warpuser:warpuser /WarpFactory
 
-# Create .claude.json with API key
-# IMPORTANT: Replace YOUR-ANTHROPIC-API-KEY-HERE with your actual API key from
-# https://console.anthropic.com/settings/keys before building
-RUN echo '{\
-  "changelogLastFetched": 1000000000000,\
-  "primaryApiKey": "YOUR-ANTHROPIC-API-KEY-HERE",\
-  "isQualifiedForDataSharing": false,\
-  "hasCompletedOnboarding": true,\
-  "lastOnboardingVersion": "0.2.107",\
-  "maxSubscriptionNoticeCount": 0,\
-  "hasAvailableMaxSubscription": false,\
-  "lastReleaseNotesSeen": "0.2.107"\
-}' > /home/warpuser/.claude.json && \
-    chown warpuser:warpuser /home/warpuser/.claude.json && \
-    chmod 600 /home/warpuser/.claude.json
-
 USER warpuser
+
+# Set entrypoint to handle API key at runtime
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Default command
 CMD ["/bin/bash"]
