@@ -35,10 +35,6 @@ def get_scalars(metric: Tensor) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
             - expansion_scalar: Expansion θ at each spacetime point
             - shear_scalar: Shear σ² at each spacetime point
             - vorticity_scalar: Vorticity ω² at each spacetime point
-
-    Note:
-        This implementation uses a simplified covariant derivative calculation.
-        For full accuracy, a complete covariant derivative function should be used.
     """
     # Get array module (numpy or cupy)
     xp = get_array_module(metric[(0, 0)])
@@ -173,11 +169,7 @@ def _compute_covariant_derivative(
     """
     Compute covariant derivative of 4-velocity vector
 
-    This is a simplified placeholder implementation that computes
-    ∇_μ u_ν ≈ ∂_μ u_ν (ordinary derivative)
-
-    For accurate results, this should be replaced with a full implementation
-    using Christoffel symbols:
+    Implements the full covariant derivative using Christoffel symbols:
     ∇_μ u_ν = ∂_μ u_ν - Γ^α_μν u_α
 
     Args:
@@ -187,44 +179,42 @@ def _compute_covariant_derivative(
 
     Returns:
         Dictionary with (mu, nu) keys containing ∇_μ u_ν
-
-    Note:
-        This simplified version returns zeros. In practice, this should compute
-        finite differences and include Christoffel symbol corrections.
-        The function structure is provided for future implementation.
     """
+    from ..solver.christoffel import get_christoffel_symbols
+    from ..solver.finite_differences import take_finite_difference_1
+
     xp = get_array_module(metric[(0, 0)])
     s = metric.shape
 
     # Initialize covariant derivative tensor
     del_u = {}
 
-    # For now, return zeros as a placeholder
-    # TODO: Implement full covariant derivative with:
-    #   1. Finite differences of u_ν
-    #   2. Christoffel symbols Γ^α_μν
-    #   3. Connection term: -Γ^α_μν u_α
+    # Get grid spacing from metric (use scaling if available, otherwise default to 1)
+    delta = metric.scaling if hasattr(metric, 'scaling') and metric.scaling is not None else [1.0, 1.0, 1.0, 1.0]
+
+    # Compute metric derivatives
+    # diff_1_gl[(i, j, k)] = ∂_k g_ij
+    diff_1_gl = {}
+    for i in range(4):
+        for j in range(4):
+            for k in range(4):
+                diff_1_gl[(i, j, k)] = take_finite_difference_1(
+                    metric[(i, j)], k, delta, phi_phi_flag=False
+                )
+
+    # Get contravariant metric (inverse)
+    metric_up = c4_inv(metric.tensor)
+
+    # Compute covariant derivative for each component
+    # ∇_μ u_ν = ∂_μ u_ν - Γ^α_μν u_α
     for mu in range(4):
         for nu in range(4):
-            del_u[(mu, nu)] = xp.zeros(s)
+            # Compute ordinary derivative ∂_μ u_ν
+            del_u[(mu, nu)] = take_finite_difference_1(u_down[nu], mu, delta, phi_phi_flag=False)
 
-    # When a full covariant derivative is implemented, it would look like:
-    # from ..solver.christoffel import get_christoffel_symbols
-    # from ..solver.finite_differences import take_finite_difference_1
-    #
-    # # Compute metric derivatives
-    # diff_1_gl = compute_metric_derivatives(metric)
-    # metric_up = c4_inv(metric.tensor)
-    #
-    # # For each component
-    # for mu in range(4):
-    #     for nu in range(4):
-    #         # Ordinary derivative
-    #         del_u[(mu, nu)] = take_finite_difference_1(u_down[nu], mu, delta)
-    #
-    #         # Subtract connection term
-    #         for alpha in range(4):
-    #             Gamma = get_christoffel_symbols(metric_up, diff_1_gl, alpha, mu, nu)
-    #             del_u[(mu, nu)] = del_u[(mu, nu)] - Gamma * u_down[alpha]
+            # Subtract connection term: Γ^α_μν u_α
+            for alpha in range(4):
+                Gamma = get_christoffel_symbols(metric_up, diff_1_gl, alpha, mu, nu)
+                del_u[(mu, nu)] = del_u[(mu, nu)] - Gamma * u_down[alpha]
 
     return del_u

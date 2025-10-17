@@ -476,3 +476,498 @@ class TestMetricEdgeCases:
             "Metric should be finite at origin"
         assert np.isfinite(metric[(1, 1)][t, x, y, z]), \
             "Metric should be finite at origin"
+
+
+class TestLentzMetric:
+    """Test Lentz warp drive metric"""
+
+    def test_lentz_creation(self):
+        """Test Lentz metric creation with default parameters"""
+        from warpfactory.metrics.lentz.lentz import get_lentz_metric
+
+        grid_size = [5, 21, 21, 11]
+        world_center = [2.5, 10.5, 10.5, 5.5]
+        velocity = 0.5
+        scale = 3.0
+
+        metric = get_lentz_metric(grid_size, world_center, velocity, scale)
+
+        assert metric.name == "Lentz", "Name should be 'Lentz'"
+        assert metric.type == "metric", "Type should be 'metric'"
+        assert metric.index == "covariant", "Index should be 'covariant'"
+        assert verify_tensor(metric, suppress_msgs=True), \
+            "Lentz metric should verify"
+
+    def test_lentz_params_stored(self):
+        """Test that Lentz parameters are stored"""
+        from warpfactory.metrics.lentz.lentz import get_lentz_metric
+
+        grid_size = [5, 21, 21, 11]
+        world_center = [2.5, 10.5, 10.5, 5.5]
+        velocity = 0.5
+        scale = 3.0
+
+        metric = get_lentz_metric(grid_size, world_center, velocity, scale)
+
+        assert "velocity" in metric.params, "Should store velocity"
+        assert "scale" in metric.params, "Should store scale"
+        assert metric.params["velocity"] == velocity, "Should store correct velocity"
+        assert metric.params["scale"] == scale, "Should store correct scale"
+
+    def test_lentz_warp_factors(self):
+        """Test that Lentz warp factors are correctly identified"""
+        from warpfactory.metrics.lentz.lentz import get_warp_factor_by_region
+
+        scale = 1.0
+
+        # Region 1: Right triangle region (x >= scale, x <= 2*scale, x-scale >= y)
+        WFX, WFY = get_warp_factor_by_region(1.5, 0.0, scale)
+        assert WFX == -2.0, "Region 1 should have WFX = -2.0"
+        assert WFY == 0.0, "Region 1 should have WFY = 0.0"
+
+        # Region 2: Upper right diagonal
+        WFX, WFY = get_warp_factor_by_region(1.5, 1.0, scale)
+        assert WFX == -1.0, "Region 2 should have WFX = -1.0"
+        assert WFY == 1.0, "Region 2 should have WFY = 1.0"
+
+        # Region 3: Center upper vertical (x > 0, x <= scale, x+scale > y, -y+scale < x)
+        # For x=0.3, y=0.2: x+scale > y → 1.3 > 0.2 ✓, -y+scale < x → 0.8 < 0.3 ✗
+        # Actually Region 7 is triggered for most points in center
+        # Let's test Region 7 instead
+        WFX, WFY = get_warp_factor_by_region(0.5, 0.0, scale)
+        assert WFX == 1.0, "Region 7 should have WFX = 1.0"
+        assert WFY == 0.0, "Region 7 should have WFY = 0.0"
+
+        # Test another clear case in Region 7
+        WFX, WFY = get_warp_factor_by_region(0.0, 0.0, scale)
+        assert WFX == 1.0, "Region 7 center should have WFX = 1.0"
+        assert WFY == 0.0, "Region 7 center should have WFY = 0.0"
+
+    def test_lentz_shift_vector_components(self):
+        """Test Lentz shift vector has both x and y components"""
+        from warpfactory.metrics.lentz.lentz import get_lentz_metric
+
+        # Use centered configuration so bubble is at origin at t=0
+        grid_size = [1, 21, 21, 11]  # Single time slice
+        world_center = [0.0, 10.5, 10.5, 5.5]  # t=0 so bubble is centered
+        velocity = 0.5
+
+        metric = get_lentz_metric(grid_size, world_center, velocity)
+
+        # Check g_01 and g_02 components directly (shift vector components)
+        g_tx = metric[(0, 1)]
+        g_ty = metric[(0, 2)]
+
+        # Shift should have non-zero x and y components in some regions
+        # Check that at least some points are non-zero
+        has_nonzero_x_shift = np.any(np.abs(g_tx) > 1e-10)
+        has_nonzero_y_shift = np.any(np.abs(g_ty) > 1e-10)
+
+        assert has_nonzero_x_shift, \
+            "Lentz should have non-zero shift in x direction in some regions"
+        assert has_nonzero_y_shift, \
+            "Lentz should have non-zero shift in y direction in some regions"
+
+    def test_lentz_symmetry(self):
+        """Test Lentz metric symmetry properties"""
+        from warpfactory.metrics.lentz.lentz import get_lentz_metric
+
+        grid_size = [3, 15, 15, 9]
+        world_center = [1.5, 7.5, 7.5, 4.5]
+        velocity = 0.3
+
+        metric = get_lentz_metric(grid_size, world_center, velocity)
+
+        # Metric should be symmetric
+        for i in range(4):
+            for j in range(4):
+                assert np.allclose(metric[(i, j)], metric[(j, i)], atol=1e-10), \
+                    f"Metric should be symmetric: g_{i}{j} = g_{j}{i}"
+
+    def test_lentz_default_scale(self):
+        """Test Lentz metric with default scale parameter"""
+        from warpfactory.metrics.lentz.lentz import get_lentz_metric
+
+        grid_size = [5, 21, 21, 11]
+        world_center = [2.5, 10.5, 10.5, 5.5]
+        velocity = 0.5
+
+        # Should use default scale = max(grid_size[1:4]) / 7
+        metric = get_lentz_metric(grid_size, world_center, velocity)
+
+        expected_scale = max(grid_size[1:4]) / 7.0
+        assert metric.params["scale"] == expected_scale, \
+            "Default scale should be max(grid_size[1:4]) / 7"
+
+    def test_lentz_edge_cases(self):
+        """Test Lentz metric edge cases and boundary regions"""
+        from warpfactory.metrics.lentz.lentz import get_warp_factor_by_region
+
+        scale = 1.0
+
+        # Test points at boundaries between regions
+        # At y = 0 (center horizontal line)
+        WFX, WFY = get_warp_factor_by_region(0.0, 0.0, scale)
+        assert WFY == 0.0, "On horizontal centerline, WFY should be 0"
+
+        # Test symmetry in y
+        WFX_pos, WFY_pos = get_warp_factor_by_region(0.5, 0.5, scale)
+        WFX_neg, WFY_neg = get_warp_factor_by_region(0.5, -0.5, scale)
+        assert WFX_pos == WFX_neg, "WFX should be symmetric in y"
+        assert WFY_pos == -WFY_neg, "WFY should be antisymmetric in y"
+
+
+class TestVanDenBroeckMetric:
+    """Test Van Den Broeck warp drive metric"""
+
+    def test_van_den_broeck_creation(self):
+        """Test Van Den Broeck metric creation"""
+        from warpfactory.metrics.van_den_broeck.van_den_broeck import \
+            get_van_den_broeck_metric
+
+        grid_size = [5, 10, 10, 10]
+        world_center = [2.5, 5.0, 5.0, 5.0]
+        v = 0.5
+        R1 = 2.0
+        sigma1 = 5.0
+        R2 = 2.0
+        sigma2 = 5.0
+        A = 2.0
+
+        metric = get_van_den_broeck_metric(
+            grid_size, world_center, v, R1, sigma1, R2, sigma2, A
+        )
+
+        assert metric.name == "Van Den Broeck", \
+            "Name should be 'Van Den Broeck'"
+        assert metric.type == "metric", "Type should be 'metric'"
+        assert verify_tensor(metric, suppress_msgs=True), \
+            "Van Den Broeck metric should verify"
+
+    def test_van_den_broeck_params_stored(self):
+        """Test that Van Den Broeck parameters are stored"""
+        from warpfactory.metrics.van_den_broeck.van_den_broeck import \
+            get_van_den_broeck_metric
+
+        grid_size = [5, 10, 10, 10]
+        world_center = [2.5, 5.0, 5.0, 5.0]
+        v = 0.5
+        R1 = 2.0
+        sigma1 = 5.0
+        R2 = 2.0
+        sigma2 = 5.0
+        A = 2.0
+
+        metric = get_van_den_broeck_metric(
+            grid_size, world_center, v, R1, sigma1, R2, sigma2, A
+        )
+
+        assert "R1" in metric.params, "Should store R1"
+        assert "R2" in metric.params, "Should store R2"
+        assert "A" in metric.params, "Should store A"
+        assert metric.params["A"] == A, "Should store correct A value"
+
+    def test_van_den_broeck_expansion_factor(self):
+        """Test spatial expansion factor B(r)"""
+        from warpfactory.metrics.van_den_broeck.van_den_broeck import \
+            get_van_den_broeck_metric
+
+        grid_size = [1, 9, 9, 9]
+        world_center = [0.0, 4.5, 4.5, 4.5]  # Centered at t=0
+        v = 0.5
+        R1 = 2.0
+        sigma1 = 5.0
+        R2 = 2.0
+        sigma2 = 5.0
+        A = 2.0
+
+        metric = get_van_den_broeck_metric(
+            grid_size, world_center, v, R1, sigma1, R2, sigma2, A
+        )
+
+        # At grid center (bubble center at t=0), B should be > 1
+        t, x, y, z = 0, 4, 4, 4  # Center point
+        g_xx = metric[(1, 1)][t, x, y, z]
+
+        # g_xx = B^2, so B = sqrt(g_xx)
+        B_center = np.sqrt(g_xx)
+
+        # At center, B should be influenced by expansion factor A
+        # B = 1 + f*A where f is shape function (near 1 at center)
+        assert B_center >= 1.0, "Expansion factor should be >= 1"
+        # For small radius and high sigma, shape function is near 1 at center
+        assert B_center <= 1 + A + 1.0, \
+            f"Expansion factor at center should be reasonable, got {B_center}"
+
+    def test_van_den_broeck_effective_velocity(self):
+        """Test that effective velocity is v_eff = v(1+A)^2"""
+        from warpfactory.metrics.van_den_broeck.van_den_broeck import \
+            get_van_den_broeck_metric
+
+        grid_size = [5, 10, 10, 10]
+        world_center = [2.5, 5.0, 5.0, 5.0]
+        v = 0.5
+        R1 = 2.0
+        sigma1 = 5.0
+        R2 = 2.0
+        sigma2 = 5.0
+        A = 2.0
+
+        metric = get_van_den_broeck_metric(
+            grid_size, world_center, v, R1, sigma1, R2, sigma2, A
+        )
+
+        # Effective velocity should be stored
+        expected_velocity = v * (1 + A)**2
+        assert "velocity" in metric.params, "Should store velocity"
+        assert np.isclose(metric.params["velocity"], expected_velocity), \
+            f"Velocity should be v(1+A)^2 = {expected_velocity}"
+
+    def test_van_den_broeck_metric_signature(self):
+        """Test Van Den Broeck metric signature"""
+        from warpfactory.metrics.van_den_broeck.van_den_broeck import \
+            get_van_den_broeck_metric
+
+        grid_size = [3, 9, 9, 9]
+        world_center = [1.5, 4.5, 4.5, 4.5]
+        v = 0.1  # Small velocity
+        R1 = 2.0
+        sigma1 = 5.0
+        R2 = 2.0
+        sigma2 = 5.0
+        A = 1.0
+
+        metric = get_van_den_broeck_metric(
+            grid_size, world_center, v, R1, sigma1, R2, sigma2, A
+        )
+
+        # Time component should be negative
+        assert np.all(metric[(0, 0)] < 0), "g_00 should be negative (timelike)"
+
+        # Spatial components should be positive
+        assert np.all(metric[(1, 1)] > 0), "g_11 should be positive"
+        assert np.all(metric[(2, 2)] > 0), "g_22 should be positive"
+        assert np.all(metric[(3, 3)] > 0), "g_33 should be positive"
+
+    def test_van_den_broeck_different_expansions(self):
+        """Test Van Den Broeck with different expansion factors"""
+        from warpfactory.metrics.van_den_broeck.van_den_broeck import \
+            get_van_den_broeck_metric
+
+        grid_size = [3, 9, 9, 9]
+        world_center = [1.5, 4.5, 4.5, 4.5]
+        v = 0.5
+        R1 = 2.0
+        sigma1 = 5.0
+        R2 = 2.0
+        sigma2 = 5.0
+
+        for A in [0.5, 1.0, 2.0, 5.0]:
+            metric = get_van_den_broeck_metric(
+                grid_size, world_center, v, R1, sigma1, R2, sigma2, A
+            )
+            assert verify_tensor(metric, suppress_msgs=True), \
+                f"Van Den Broeck metric should verify for A={A}"
+
+    def test_van_den_broeck_shift_function(self):
+        """Test shift function in Van Den Broeck metric"""
+        from warpfactory.metrics.van_den_broeck.van_den_broeck import \
+            get_van_den_broeck_metric
+
+        grid_size = [1, 9, 9, 9]
+        world_center = [0.0, 4.5, 4.5, 4.5]  # Centered at t=0
+        v = 0.5
+        R1 = 2.0
+        sigma1 = 5.0
+        R2 = 2.0
+        sigma2 = 5.0
+        A = 2.0
+
+        metric = get_van_den_broeck_metric(
+            grid_size, world_center, v, R1, sigma1, R2, sigma2, A
+        )
+
+        # Shift vector creates g_tx component
+        # Check that we have non-zero shift somewhere in the grid
+        g_tx = metric[(0, 1)]
+
+        has_nonzero_shift = np.any(np.abs(g_tx) > 1e-10)
+        assert has_nonzero_shift, "Shift vector should create non-zero g_tx in the bubble"
+
+
+class TestModifiedTimeMetric:
+    """Test Modified Time warp drive metric"""
+
+    def test_modified_time_creation(self):
+        """Test Modified Time metric creation"""
+        from warpfactory.metrics.modified_time.modified_time import \
+            get_modified_time_metric
+
+        grid_size = [5, 10, 10, 10]
+        world_center = [2.5, 5.0, 5.0, 5.0]
+        velocity = 1.0
+        radius = 2.0
+        sigma = 5.0
+        A = 2.0
+
+        metric = get_modified_time_metric(
+            grid_size, world_center, velocity, radius, sigma, A
+        )
+
+        assert metric.name == "Modified Time", \
+            "Name should be 'Modified Time'"
+        assert metric.type == "metric", "Type should be 'metric'"
+        assert verify_tensor(metric, suppress_msgs=True), \
+            "Modified Time metric should verify"
+
+    def test_modified_time_params_stored(self):
+        """Test that Modified Time parameters are stored"""
+        from warpfactory.metrics.modified_time.modified_time import \
+            get_modified_time_metric
+
+        grid_size = [5, 10, 10, 10]
+        world_center = [2.5, 5.0, 5.0, 5.0]
+        velocity = 1.0
+        radius = 2.0
+        sigma = 5.0
+        A = 2.0
+
+        metric = get_modified_time_metric(
+            grid_size, world_center, velocity, radius, sigma, A
+        )
+
+        assert "velocity" in metric.params, "Should store velocity"
+        assert "R" in metric.params, "Should store radius"
+        assert "sigma" in metric.params, "Should store sigma"
+        assert "A" in metric.params, "Should store A"
+        assert metric.params["A"] == A, "Should store correct A value"
+
+    def test_modified_time_lapse_modification(self):
+        """Test lapse function modification"""
+        from warpfactory.metrics.modified_time.modified_time import \
+            get_modified_time_metric
+        from warpfactory.metrics.three_plus_one import three_plus_one_decomposer
+
+        grid_size = [1, 9, 9, 9]
+        world_center = [0.0, 4.5, 4.5, 4.5]  # Centered at t=0
+        velocity = 0.5
+        radius = 2.0
+        sigma = 5.0
+        A = 2.0
+
+        metric = get_modified_time_metric(
+            grid_size, world_center, velocity, radius, sigma, A
+        )
+
+        # Decompose to get lapse function
+        alpha, beta_down, gamma_down, beta_up, gamma_up = \
+            three_plus_one_decomposer(metric)
+
+        # Lapse should be modified: alpha = (1-fs) + fs/A
+        # At bubble center at t=0, fs should be significant
+        # Check that lapse varies across grid (not all 1.0)
+        alpha_min = np.min(alpha)
+        alpha_max = np.max(alpha)
+
+        assert alpha_max > 0.0, "Lapse should be positive"
+        # If A > 1, lapse should be < 1 somewhere in bubble
+        if A > 1.0:
+            assert alpha_min < 1.0 or alpha_max > 1.0, \
+                "Lapse should vary from Minkowski value when modified"
+
+    def test_modified_time_three_plus_one_properties(self):
+        """Test 3+1 decomposition properties"""
+        from warpfactory.metrics.modified_time.modified_time import \
+            get_modified_time_metric
+        from warpfactory.metrics.three_plus_one import three_plus_one_decomposer
+
+        grid_size = [5, 10, 10, 10]
+        world_center = [2.5, 5.0, 5.0, 5.0]
+        velocity = 1.0
+        radius = 2.0
+        sigma = 5.0
+        A = 2.0
+
+        metric = get_modified_time_metric(
+            grid_size, world_center, velocity, radius, sigma, A
+        )
+
+        # Should be able to decompose
+        alpha, beta_down, gamma_down, beta_up, gamma_up = \
+            three_plus_one_decomposer(metric)
+
+        # All components should be finite
+        assert np.all(np.isfinite(alpha)), "Lapse should be finite"
+        for i in range(3):
+            assert np.all(np.isfinite(beta_down[i])), \
+                f"Shift[{i}] should be finite"
+
+    def test_modified_time_metric_symmetry(self):
+        """Test metric symmetry"""
+        from warpfactory.metrics.modified_time.modified_time import \
+            get_modified_time_metric
+
+        grid_size = [3, 9, 9, 9]
+        world_center = [1.5, 4.5, 4.5, 4.5]
+        velocity = 0.5
+        radius = 2.0
+        sigma = 5.0
+        A = 2.0
+
+        metric = get_modified_time_metric(
+            grid_size, world_center, velocity, radius, sigma, A
+        )
+
+        # Metric should be symmetric
+        for i in range(4):
+            for j in range(4):
+                assert np.allclose(metric[(i, j)], metric[(j, i)], atol=1e-10), \
+                    f"Metric should be symmetric: g_{i}{j} = g_{j}{i}"
+
+    def test_modified_time_different_lapse_rates(self):
+        """Test Modified Time with different lapse rate parameters"""
+        from warpfactory.metrics.modified_time.modified_time import \
+            get_modified_time_metric
+
+        grid_size = [3, 9, 9, 9]
+        world_center = [1.5, 4.5, 4.5, 4.5]
+        velocity = 0.5
+        radius = 2.0
+        sigma = 5.0
+
+        for A in [0.5, 1.0, 2.0, 5.0]:
+            metric = get_modified_time_metric(
+                grid_size, world_center, velocity, radius, sigma, A
+            )
+            assert verify_tensor(metric, suppress_msgs=True), \
+                f"Modified Time metric should verify for A={A}"
+
+    def test_modified_time_vs_alcubierre(self):
+        """Test that Modified Time differs from Alcubierre"""
+        from warpfactory.metrics.modified_time.modified_time import \
+            get_modified_time_metric
+        from warpfactory.metrics.alcubierre import get_alcubierre_metric
+
+        grid_size = [1, 9, 9, 9]
+        world_center = [0.0, 4.5, 4.5, 4.5]  # Centered at t=0
+        velocity = 0.5
+        radius = 2.0
+        sigma = 5.0
+        A = 2.0
+
+        modified = get_modified_time_metric(
+            grid_size, world_center, velocity, radius, sigma, A
+        )
+        alcubierre = get_alcubierre_metric(
+            grid_size, world_center, velocity, radius, sigma
+        )
+
+        # g_00 should differ somewhere in the grid due to lapse modification
+        # Check if they differ anywhere (not necessarily at grid center)
+        g00_modified = modified[(0, 0)]
+        g00_alcubierre = alcubierre[(0, 0)]
+
+        # They should differ somewhere if A != 1
+        max_diff = np.max(np.abs(g00_modified - g00_alcubierre))
+        assert max_diff > 1e-10 or A == 1.0, \
+            f"Modified Time g_00 should differ from Alcubierre when A={A}, max diff={max_diff}"
