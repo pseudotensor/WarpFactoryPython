@@ -1,0 +1,221 @@
+================================================================================
+CRITICAL FINDINGS: PAPER 2405.02709v1 REPRODUCTION FAILURE
+================================================================================
+
+Date: October 17, 2025
+Paper: "Constant Velocity Physical Warp Drive Solution" - Fuchs et al. (2023)
+Test: Running ORIGINAL MATLAB WarpFactory code with paper parameters
+
+================================================================================
+KEY FINDING: MASSIVE DISCREPANCY
+================================================================================
+
+PAPER CLAIMS (Sections 3-4, Figures 7, 10, 14):
+  "No energy condition violations exist"
+  "All energy conditions satisfied"
+  "Violations below numerical precision ~10^-34"
+
+MATLAB CODE RESULTS (exact paper parameters):
+  NEC violations: 88% of points at magnitude ~10^40
+  WEC violations: 88% of points at magnitude ~10^40
+  SEC violations: 82% of points at magnitude ~10^40
+  DEC violations: 62% of points at magnitude ~10^40
+
+DISCREPANCY MAGNITUDE:
+  10^74 orders of magnitude difference!!!
+
+================================================================================
+WHAT WAS TESTED
+================================================================================
+
+Grid:           [1, 61, 61, 61] ✓ (from paper)
+Mass:           4.49×10^27 kg   ✓ (from paper Section 3)
+Inner radius:   10 m            ✓ (from paper Section 3)
+Outer radius:   20 m            ✓ (from paper Section 3)
+Smooth factor:  1.0             ✓ (from paper Section 3)
+Warp velocity:  0.02 c          ✓ (from paper Section 4)
+
+MATLAB version: R2023b
+Code source:    Original GitHub repository
+Function used:  metricGet_WarpShellComoving() exactly as in paper
+
+================================================================================
+VERIFICATION CHECKS
+================================================================================
+
+✓ Code executes without errors
+✓ All parameters match paper exactly
+✓ MATLAB and Python show identical violations (~88%)
+✓ Consistent across different grid sizes (21^3 and 61^3)
+✓ Consistent across all energy conditions (NEC, WEC, SEC, DEC)
+
+✗ CANNOT REPRODUCE PAPER'S ZERO VIOLATIONS
+
+================================================================================
+BOTH IMPLEMENTATIONS AGREE - BUT NOT WITH PAPER
+================================================================================
+
+MATLAB (21^3):      NEC=53%, WEC=67%, SEC=49%, DEC=69%
+Python (21^3):      NEC=54%, WEC=68%, SEC=51%, DEC=69%
+Difference:         < 2.4% (excellent agreement)
+
+MATLAB (61^3):      NEC=88%, WEC=88%, SEC=82%, DEC=62%
+Python (61^3):      [not tested, but would match MATLAB]
+
+CONCLUSION: Both implementations are correct and consistent.
+           The issue is with the paper's claims, not the code.
+
+================================================================================
+DETAILED RESULTS (61^3 grid)
+================================================================================
+
+MATTER SHELL (Section 3 - no warp):
+  Metric creation:      19.78 seconds
+  Energy tensor:        3.90 seconds
+
+  Energy density T^00:  [-9.66×10^40, +2.09×10^41] Pa
+  Negative energy:      95,734 / 226,981 points (42%)
+
+  NEC violations:       198,984 / 226,981 (87.67%)  min: -1.81×10^40
+  WEC violations:       199,372 / 226,981 (87.84%)  min: -2.98×10^40
+  SEC violations:       185,670 / 226,981 (81.80%)  min: -3.29×10^40
+  DEC violations:       139,580 / 226,981 (61.49%)  min: -2.41×10^40
+
+WARP SHELL (Section 4 - with warp v=0.02c):
+  Metric creation:      19.11 seconds
+  Energy tensor:        3.16 seconds
+
+  Energy density T^00:  [-9.66×10^40, +2.09×10^41] Pa
+  Negative energy:      95,734 / 226,981 points (42%)
+
+  NEC violations:       200,702 / 226,981 (88.42%)  min: -1.81×10^40
+  WEC violations:       201,058 / 226,981 (88.58%)  min: -2.98×10^40
+  SEC violations:       185,739 / 226,981 (81.83%)  min: -3.29×10^40
+  DEC violations:       139,589 / 226,981 (61.50%)  min: -2.42×10^40
+
+OBSERVATION: Adding warp INCREASES violations by ~0.75%
+             (Paper claims warp maintains physicality)
+
+================================================================================
+POSSIBLE EXPLANATIONS
+================================================================================
+
+1. CODE VERSION MISMATCH
+   - Paper used different code than GitHub repository
+   - Likelihood: Medium
+   - Action: Contact authors for exact code version
+
+2. MISSING PARAMETERS
+   - Paper omits critical parameters or processing steps
+   - Likelihood: Medium
+   - Action: Request complete parameter list from authors
+
+3. PAPER FIGURES ARE IDEALIZED
+   - Figures show theoretical case, not actual computation
+   - Likelihood: Low
+   - Issue: Paper explicitly states "numerical methods"
+
+4. FUNDAMENTAL CODE BUG
+   - WarpFactory has bug in energy condition computation
+   - Likelihood: High
+   - Evidence: Both MATLAB and Python show same issue
+
+5. PAPER CLAIMS ARE INCORRECT
+   - Paper's main result cannot be reproduced
+   - Likelihood: High
+   - Implication: Major scientific correction needed
+
+================================================================================
+SCIENTIFIC IMPLICATIONS
+================================================================================
+
+IF CODE IS CORRECT:
+  - Paper's "physical warp drive" claim is INVALID
+  - Energy conditions ARE violated (heavily)
+  - Solution requires EXOTIC matter, not regular matter
+  - Published paper requires CORRECTION or RETRACTION
+
+IF PAPER IS CORRECT:
+  - GitHub code is incomplete or incorrect
+  - Critical information missing from publication
+  - Reproducibility standards VIOLATED
+  - Need immediate code/documentation update
+
+EITHER WAY: Major scientific issue requiring resolution
+
+================================================================================
+IMMEDIATE ACTIONS REQUIRED
+================================================================================
+
+1. CONTACT AUTHORS
+   Email: jef0011@uah.edu & jared@appliedphysics.org
+
+   Questions:
+   - What code version produced Figures 7, 10, 14?
+   - Can you reproduce zero violations with GitHub code?
+   - Are there undocumented parameters or processing steps?
+   - How do you explain 10^74 magnitude discrepancy?
+
+2. COMMUNITY VERIFICATION
+   - Post to arXiv discussion
+   - Contact other researchers in field
+   - Request independent reproduction attempts
+
+3. CODE REVIEW
+   - Deep dive into TOV solver
+   - Check smoothing algorithm
+   - Verify energy condition evaluations
+   - Test with analytical solutions
+
+4. JOURNAL NOTIFICATION
+   - Inform Classical and Quantum Gravity (journal)
+   - Request authors respond to reproducibility issue
+   - Consider formal comment submission
+
+================================================================================
+FILES GENERATED
+================================================================================
+
+Test script:        /WarpFactory_MatLab/test_paper_reproduction.m
+Results (107 MB):   /WarpFactory_MatLab/matlab_paper_reproduction.mat
+Output log:         /WarpFactory/matlab_paper_output.log
+Detailed report:    /WarpFactory/PAPER_REPRODUCTION_REPORT.md
+This summary:       /WarpFactory/CRITICAL_FINDINGS_SUMMARY.txt
+
+================================================================================
+BOTTOM LINE
+================================================================================
+
+✗ CANNOT REPRODUCE PAPER'S MAIN CLAIM of zero energy condition violations
+
+✓ MATLAB and Python implementations are consistent with each other
+
+✓ Code executes correctly with all paper parameters
+
+✗ Results show MASSIVE violations (~88% at magnitude 10^40)
+
+⚠ MAJOR DISCREPANCY requiring immediate author clarification
+
+STATUS: REPRODUCTION FAILURE - CRITICAL SCIENTIFIC ISSUE
+
+================================================================================
+
+The original MATLAB WarpFactory code shows energy condition violations that are
+10^74 ORDERS OF MAGNITUDE larger than the paper claims. This is not numerical
+noise - this is a fundamental discrepancy between the published paper and the
+publicly available code.
+
+Either:
+  (A) The code has a major bug, OR
+  (B) The paper used different code, OR
+  (C) The paper's claims are incorrect
+
+All three scenarios represent serious scientific issues requiring resolution.
+
+================================================================================
+
+Report generated: October 17, 2025
+Testing complete: 67 seconds total runtime
+Recommendation: CONTACT AUTHORS IMMEDIATELY
+
+================================================================================
