@@ -63,8 +63,8 @@ RUN npm install -g @anthropic-ai/claude-code
 # Create a non-root user for safety
 RUN useradd -m -s /bin/bash warpuser && \
     chown -R warpuser:warpuser /WarpFactory && \
-    mkdir -p /home/warpuser/.matlab/R2023b && \
-    chown -R warpuser:warpuser /home/warpuser/.matlab
+    mkdir -p /home/warpuser/.matlab/R2023b /home/warpuser/.claude && \
+    chown -R warpuser:warpuser /home/warpuser/.matlab /home/warpuser/.claude
 
 # Create a startup script to set up .claude.json from environment variable
 RUN echo '#!/bin/bash\n\
