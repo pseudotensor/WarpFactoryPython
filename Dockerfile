@@ -40,7 +40,7 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 RUN python3 -m pip install --upgrade pip setuptools wheel
 
 # Set working directory
-WORKDIR /warpfactory_py
+WORKDIR /WarpFactory
 
 # Install CuPy for CUDA 12.x (matching system CUDA 12.3)
 RUN pip install --no-cache-dir cupy-cuda12x
@@ -62,8 +62,8 @@ RUN npm install -g @anthropic-ai/claude-code
 
 # Create a non-root user for safety
 RUN useradd -m -s /bin/bash warpuser && \
-    mkdir -p /warpfactory_py /WarpFactory && \
-    chown -R warpuser:warpuser /warpfactory_py /WarpFactory && \
+    mkdir -p /WarpFactory /WarpFactory_MatLab && \
+    chown -R warpuser:warpuser /WarpFactory /WarpFactory_MatLab && \
     mkdir -p /home/warpuser/.matlab/R2023b /home/warpuser/.claude && \
     chown -R warpuser:warpuser /home/warpuser/.matlab /home/warpuser/.claude
 
@@ -84,7 +84,7 @@ if [ -n "$INIT_ANTHROPIC_API_KEY" ]; then\n\
 fi\n\
 exec "$@"' > /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh && \
-    chown -R warpuser:warpuser /warpfactory_py /WarpFactory
+    chown -R warpuser:warpuser /WarpFactory /WarpFactory_MatLab
 
 USER warpuser
 
